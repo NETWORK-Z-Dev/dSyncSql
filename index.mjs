@@ -1,19 +1,31 @@
 import mysql from "mysql2/promise";
+import Logger from "@hackthedev/terminal-logger"
 
 export default class dSyncSql {
-    constructor(host, user, pass, db, connectionLimit = 10) {
+    constructor({
+                    host,
+                    user,
+                    password,
+                    database,
+                    waitForConnections = true,
+                    connectionLimit = 10,
+                    queueLimit = 0,
+                }) {
+
         if(!host) throw new Error('host address is required');
         if(!user) throw new Error('username is required');
-        if(!pass) throw new Error('password is required');
-        if(!db) throw new Error('database is required');
+        if(!password) throw new Error('password is required');
+        if(!database) throw new Error('database is required');
+
+        this.connection_info = {host, user, password, database};
 
         this.pool = mysql.createPool({
-            host: host,
-            user: user,
-            password: pass,
-            database: db,
-            waitForConnections: true,
-            connectionLimit: connectionLimit,
+            host,
+            user,
+            password,
+            database,
+            waitForConnections,
+            connectionLimit,
             queueLimit: 0,
             typeCast: function (field, next) {
                 if (field.type === "TINY" && field.length === 1) {
@@ -69,7 +81,7 @@ export default class dSyncSql {
         `;
 
         try {
-            const results = await this.queryDatabase(query, [serverconfig.serverinfo.sql.database, table.name]);
+            const results = await this.queryDatabase(query, [this.connection_info.database, table.name]);
             const tableExists = results[0]['COUNT(*)'] > 0;
 
             if (tableExists) {
@@ -91,7 +103,7 @@ export default class dSyncSql {
         `;
 
         try {
-            const results = await this.queryDatabase(query, [serverconfig.serverinfo.sql.database, table.name]);
+            const results = await this.queryDatabase(query, [this.connection_info.database, table.name]);
             const existingColumns = results.map(row => row.COLUMN_NAME);
             const missingColumns = table.columns.filter(col => !existingColumns.includes(col.name));
 

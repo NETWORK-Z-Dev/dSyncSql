@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@hackthedev/terminal-logger": "^1.0.0",
+    "mysql2": "^3.16.0",
+    "mysql2-promise": "^0.1.4"
+  }
+}

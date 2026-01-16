@@ -1,5 +1,7 @@
 import mysql from "mysql2/promise";
 import Logger from "@hackthedev/terminal-logger"
+import {spawn} from "node:child_process";
+import fs from "fs";
 
 export default class dSyncSql {
     constructor({
@@ -33,6 +35,24 @@ export default class dSyncSql {
                 }
                 return next();
             },
+        });
+    }
+
+    async exportDatabase(outFile) {
+        if(!outFile) throw new Error('Output File path is required');
+        return await new Promise((resolve, reject) => {
+            const dump = spawn("mariadb-dump", [
+                "-h", this.host,
+                "-u", this.user,
+                `-p${this.password}`,
+                this.database
+            ]);
+
+            const stream = fs.createWriteStream(outFile);
+
+            dump.stdout.pipe(stream);
+            dump.stderr.on("data", d => reject(d.toString()));
+            dump.on("close", code => code === 0 ? resolve() : reject(code));
         });
     }
 

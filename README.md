@@ -2,10 +2,6 @@
 
 dSyncSql is supposed to be a helper for handling MySQL / MariaDB connections and executing queries. In addition it will also allow you to automatically create a database's structure like tables, column and such and will automatically create missing columns and tables based off a json Object.
 
-> [!IMPORTANT]
->
-> This readme is still work in progress and examples and all will come once done.
-
 ------
 
 ## Connection setup
@@ -20,9 +16,9 @@ export let db = new dSyncSql({
     user: "username",
     password: "some_password",
     database: "database_name",
-    waitForConnections: true,		// optional
-    connectionLimit: 10, 			// optional
-    queueLimit: 0,					// optional
+    waitForConnections: true, // optional
+    connectionLimit: 10, // optional
+    queueLimit: 0, // optional
 });
 ```
 
@@ -30,7 +26,11 @@ export let db = new dSyncSql({
 
 ## Defining a database
 
-The following is optional but dSyncSql was designed to automatically create the database structure to make deployment and updates smooth and automatic.
+The following is optional but dSyncSql was designed to automatically create the database structure to make deployment and updates smooth and automatic. 
+
+> [!CAUTION]
+>
+> The library wont create the database itself.
 
 ```js
 const tables = [

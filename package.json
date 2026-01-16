@@ -1,7 +1,25 @@
 {
+  "name": "@hackthedev/dsync-sql",
+  "version": "1.0.0",
+  "description": "dSyncSql is supposed to be a helper for handling MySQL / MariaDB connections and executing queries. In addition it will also allow you to automatically create a database's structure like tables, column and such and will automatically create missing columns and tables based off a json Object.",
+  "homepage": "https://github.com/NETWORK-Z-Dev/dSyncSql#readme",
+  "bugs": {
+    "url": "https://github.com/NETWORK-Z-Dev/dSyncSql/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NETWORK-Z-Dev/dSyncSql.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "@hackthedev/terminal-logger": "^1.0.0",
     "mysql2": "^3.16.0",
     "mysql2-promise": "^0.1.4"
-  }
+  },
+  "devDependencies": {}
 }

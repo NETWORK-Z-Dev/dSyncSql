@@ -41,10 +41,10 @@ export default class dSyncSql {
         if(!outFile) throw new Error('Output File path is required');
         return await new Promise((resolve, reject) => {
             const dump = spawn("mariadb-dump", [
-                "-h", this.host,
-                "-u", this.user,
-                `-p${this.password}`,
-                this.database
+                "-h", this.connection_info.host,
+                "-u", this.connection_info.user,
+                `-p${this.connection_info.password}`,
+                this.connection_info.database
             ]);
 
             const stream = fs.createWriteStream(outFile);

@@ -16,7 +16,6 @@ export default class dSyncSql {
 
         if(!host) throw new Error('host address is required');
         if(!user) throw new Error('username is required');
-        if(!password) throw new Error('password is required');
         if(!database) throw new Error('database is required');
 
         this.connection_info = {host, user, password, database};

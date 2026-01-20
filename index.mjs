@@ -73,7 +73,7 @@ export default class dSyncSql {
 
         try {
             connection = await this.pool.getConnection();
-            const [results,] = await connection.execute(query, params);
+            const [results] = await connection.execute(query, params);
             return results;
         } catch (err) {
             if (err.code === 'ER_LOCK_DEADLOCK' && retryCount > 0) {
@@ -138,32 +138,32 @@ export default class dSyncSql {
     }
 
     async createTable(table) {
-        const columnsDefinition = table.columns.map(col => `${col.name} ${col.type}`).join(', ');
+        const columns = [...table.columns];
+
+        if (table.keys) {
+            for (const key of table.keys) {
+                columns.push(`${key.name} ${key.type}`);
+            }
+        }
+
+        const columnsDefinition = columns
+            .map(col => typeof col === "string" ? col : `${col.name} ${col.type}`)
+            .join(", ");
+
         const createTableQuery = mysql.format(
             `
-                CREATE TABLE ??
-                (
-                    ${columnsDefinition}
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_general_ci
-            `,
+        CREATE TABLE ??
+        (
+            ${columnsDefinition}
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+        `,
             [table.name]
         );
 
-        try {
-            console.log('Executing CREATE TABLE query:', createTableQuery);
-            await this.queryDatabase(createTableQuery);
-
-            console.log(`Table "${table.name}" created successfully.`);
-            if (table.keys) {
-                await this.addKeys(table);
-            }
-            if (table.autoIncrement) {
-                await this.addAutoIncrement(table);
-            }
-        } catch (err) {
-            Logger.error('Error in createTable:', err);
-        }
+        console.log("Executing CREATE TABLE query:", createTableQuery);
+        await this.queryDatabase(createTableQuery);
     }
+
 
     async addMissingColumns(tableName, columns) {
         const alter = columns

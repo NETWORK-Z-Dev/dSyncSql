@@ -9,6 +9,7 @@ export default class dSyncSql {
                     user,
                     password,
                     database,
+                    port,
                     waitForConnections = true,
                     connectionLimit = 10,
                     queueLimit = 0,
@@ -17,11 +18,13 @@ export default class dSyncSql {
         if(!host) throw new Error('host address is required');
         if(!user) throw new Error('username is required');
         if(!database) throw new Error('database is required');
+        if(!port) port = 3306;
 
         this.connection_info = {host, user, password, database};
 
         this.pool = mysql.createPool({
             host,
+            port,
             user,
             password,
             database,

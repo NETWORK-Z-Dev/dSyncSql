@@ -13,6 +13,7 @@ import dSyncSql from "@hackthedev/dsync-sql"
 
 export let db = new dSyncSql({
     host: "127.0.0.1",
+    port: 3306, // optional, default 3306
     user: "username",
     password: "some_password",
     database: "database_name",
@@ -28,7 +29,7 @@ export let db = new dSyncSql({
 
 The following is optional but dSyncSql was designed to automatically create the database structure to make deployment and updates smooth and automatic. 
 
-> [!CAUTION]
+> [!WARNING]
 >
 > The library wont create the database itself.
 
@@ -37,17 +38,12 @@ const tables = [
     {
         name: "network_servers",
         columns: [
-            {name: "id", type: "int(11) NOT NULL"},
-            {name: "address", type: "varchar(255) NOT NULL"},
+            {name: "id", type: "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"},
+            {name: "address", type: "varchar(255) NOT NULL UNIQUE KEY"},
             {name: "status", type: "varchar(255) NOT NULL"},
             {name: "data", type: "longtext"},
             {name: "last_sync", type: "datetime NULL"},
-        ],
-        keys: [
-            {name: "PRIMARY KEY", type: "(id)"},
-            {name: "UNIQUE KEY", type: "address (address)"},
-        ],
-        autoIncrement: "id int(11) NOT NULL AUTO_INCREMENT",
+        ]
     }
 ]
 ```

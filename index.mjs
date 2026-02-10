@@ -21,8 +21,7 @@ export default class dSyncSql {
         if(!port) port = 3306;
 
         this.connection_info = {host, user, password, database};
-
-        this.pool = mysql.createPool({
+        this.pool_config = {
             host,
             port,
             user,
@@ -37,7 +36,72 @@ export default class dSyncSql {
                 }
                 return next();
             },
-        });
+        };
+
+        this.pool = null;
+        this.ready = this._init();
+    }
+
+    async _init() {
+        await this._ensureDatabase();
+        this.pool = mysql.createPool(this.pool_config);
+    }
+
+    async _ensureDatabase() {
+        const { host, port, user, password, database } = this.pool_config;
+
+        const tmp = await mysql.createConnection({ host, port, user, password });
+
+        try {
+            await tmp.execute(
+                `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci`
+            );
+            Logger.info(`database "${database}" ready`);
+        } catch(err) {
+            Logger.error('error creating database:', err);
+            throw err;
+        } finally {
+            await tmp.end();
+        }
+    }
+
+    async waitForConnection() {
+        await this.ready;
+
+        while (true) {
+            try {
+                let conn = await this.pool.getConnection();
+                await conn.ping();
+                conn.release();
+                return;
+            } catch {
+                await new Promise((r) => setTimeout(r, 1000));
+            }
+        }
+    }
+
+    async queryDatabase(query, params, retryCount = 3) {
+        await this.ready;
+
+        let connection;
+
+        try {
+            connection = await this.pool.getConnection();
+            const [results] = await connection.execute(query, params);
+            return results;
+        } catch (err) {
+            if (err.code === 'ER_LOCK_DEADLOCK' && retryCount > 0) {
+                Logger.warn('deadlock detected, retrying transaction...', retryCount);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                return this.queryDatabase(query, params, retryCount - 1);
+            } else {
+                Logger.error('sql error executing query:');
+                Logger.error(err);
+                throw err;
+            }
+        } finally {
+            if (connection) connection.release();
+        }
     }
 
     async exportDatabase(outFile) {
